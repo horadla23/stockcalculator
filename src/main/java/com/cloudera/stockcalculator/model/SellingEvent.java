@@ -11,7 +11,11 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @Entity
-public class SellingEvent extends BaseEntity {
+public class SellingEvent {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     @OneToOne
     private StockPrice vestingPrice;

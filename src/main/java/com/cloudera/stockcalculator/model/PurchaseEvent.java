@@ -11,7 +11,11 @@ import java.util.Date;
 @Setter
 @NoArgsConstructor
 @Entity
-public class PurchaseEvent extends BaseEntity {
+public class PurchaseEvent {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
 
     @Column
     @Temporal(TemporalType.DATE)

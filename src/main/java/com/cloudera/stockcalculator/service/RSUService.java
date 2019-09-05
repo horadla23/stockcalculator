@@ -59,4 +59,8 @@ public class RSUService {
         vestingEvent.setVestingDate(date);
         vestingEventRepository.save(vestingEvent);
     }
+
+    public VestingEvent getVestingEvent(Long id) {
+        return vestingEventRepository.findById(id).get();
+    }
 }
