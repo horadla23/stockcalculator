@@ -1,4 +1,4 @@
-package com.cloudera.stockcalculator.controller;
+package com.cloudera.stockcalculator.api.controller;
 
 import org.springframework.stereotype.Controller;
 

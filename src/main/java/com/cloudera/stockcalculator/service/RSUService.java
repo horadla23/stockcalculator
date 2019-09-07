@@ -1,19 +1,19 @@
 package com.cloudera.stockcalculator.service;
 
-import com.cloudera.stockcalculator.model.Currency;
-import com.cloudera.stockcalculator.model.CurrencyRate;
-import com.cloudera.stockcalculator.model.StockPrice;
-import com.cloudera.stockcalculator.model.VestingEvent;
-import com.cloudera.stockcalculator.repository.CurrencyRateRepository;
-import com.cloudera.stockcalculator.repository.StockPriceRepository;
-import com.cloudera.stockcalculator.repository.VestingEventRepository;
+import com.cloudera.stockcalculator.persistence.model.Currency;
+import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
+import com.cloudera.stockcalculator.persistence.model.StockPrice;
+import com.cloudera.stockcalculator.persistence.model.VestingEvent;
+import com.cloudera.stockcalculator.persistence.repository.CurrencyRateRepository;
+import com.cloudera.stockcalculator.persistence.repository.StockPriceRepository;
+import com.cloudera.stockcalculator.persistence.repository.VestingEventRepository;
 import com.cloudera.stockcalculator.service.json.TimeSeries;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.inject.Inject;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import javax.ws.rs.BadRequestException;
+import java.text.*;
 import java.util.Date;
 
 @Service
@@ -32,7 +32,7 @@ public class RSUService {
     @Inject
     private VestingEventRepository vestingEventRepository;
 
-    public void addNewVesting(Date date, Integer quantity, Long usdToHufRate) {
+    public void addNewVesting(Date date, Integer quantity, Float usdToHufRate) throws ParseException {
         String pattern = "yyyy-MM-dd";
         DateFormat df = new SimpleDateFormat(pattern);
         String dateAsString = df.format(date);
@@ -44,7 +44,12 @@ public class RSUService {
         StockPrice stockPrice = new StockPrice();
         stockPrice.setDate(date);
         stockPrice.setStockCurrency(Currency.USD);
-        stockPrice.setStockPrice(Long.valueOf(object.getTimeSeriesByDate().get(dateAsString).getValues().get("4. close")));
+        if (object.getTimeSeriesByDate().containsKey(dateAsString) &&
+                object.getTimeSeriesByDate().get(dateAsString).containsKey("4. close")) {
+            stockPrice.setStockPrice(Float.parseFloat(object.getTimeSeriesByDate().get(dateAsString).get("4. close")));
+        } else {
+            throw new BadRequestException("Date is not valid, no stock data have found or stock is not closed for that date.");
+        }
         stockPriceRepository.save(stockPrice);
 
         // TODO MNB API call

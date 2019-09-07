@@ -1,4 +1,4 @@
-package com.cloudera.stockcalculator.model;
+package com.cloudera.stockcalculator.persistence.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +34,7 @@ public class SellingEvent {
     private Integer soldQuantity;
 
     @Column
-    private Long additionalFee;
+    private Float additionalFee;
 
     @Column
     @Enumerated(EnumType.STRING)

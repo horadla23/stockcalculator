@@ -12,6 +12,6 @@ import java.util.Map;
 public class TimeSeries implements Serializable {
 
     @JsonProperty(value = "Time Series (Daily)")
-    Map<String, TimeSeriesData> timeSeriesByDate;
+    Map<String, Map<String, String>> timeSeriesByDate;
 
 }

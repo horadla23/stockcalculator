@@ -1,4 +1,4 @@
-package com.cloudera.stockcalculator.model;
+package com.cloudera.stockcalculator.persistence.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ public class StockPrice {
     private Date date;
 
     @Column
-    private Long stockPrice;
+    private Float stockPrice;
 
     @Column
     private Currency stockCurrency = Currency.USD;

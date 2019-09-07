@@ -1,4 +1,4 @@
-package com.cloudera.stockcalculator.model;
+package com.cloudera.stockcalculator.persistence.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

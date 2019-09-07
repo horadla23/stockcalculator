@@ -1,6 +1,6 @@
-package com.cloudera.stockcalculator.repository;
+package com.cloudera.stockcalculator.persistence.repository;
 
-import com.cloudera.stockcalculator.model.SellingEvent;
+import com.cloudera.stockcalculator.persistence.model.SellingEvent;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface SellingEventRepository extends JpaRepository<SellingEvent, Long> {

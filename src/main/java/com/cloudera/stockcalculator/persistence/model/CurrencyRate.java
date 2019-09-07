@@ -1,4 +1,4 @@
-package com.cloudera.stockcalculator.model;
+package com.cloudera.stockcalculator.persistence.model;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,5 +25,5 @@ public class CurrencyRate {
     private Currency target = Currency.HUF;
 
     @Column(nullable = false)
-    private Long rate;
+    private Float rate;
 }
