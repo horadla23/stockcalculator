@@ -3,11 +3,12 @@ package com.cloudera.stockcalculator.api.controller;
 import com.cloudera.stockcalculator.api.dto.VestingEventDto;
 import com.cloudera.stockcalculator.api.mapper.VestingEventMapper;
 import com.cloudera.stockcalculator.service.RSUService;
-import hu.mnb.webservices.MNBArfolyamServiceSoapGetExchangeRatesStringFaultFaultMessage;
 import org.springframework.web.bind.annotation.*;
+import org.xml.sax.SAXException;
 
 import javax.inject.Inject;
-import java.net.MalformedURLException;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -20,7 +21,7 @@ public class RSUController {
     private RSUService rsuService;
 
     @GetMapping
-    public String testPut() throws ParseException, MNBArfolyamServiceSoapGetExchangeRatesStringFaultFaultMessage, MalformedURLException {
+    public String testPut() throws ParserConfigurationException, SAXException, IOException, ParseException {
         Calendar myCalendar = new GregorianCalendar(2019, Calendar.SEPTEMBER, 6);
         rsuService.addNewVesting(myCalendar.getTime(), 100);
         return "OK";

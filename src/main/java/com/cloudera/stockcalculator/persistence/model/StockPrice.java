@@ -25,6 +25,7 @@ public class StockPrice {
     @Column
     private Float stockPrice;
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private Currency stockCurrency = Currency.USD;
+    private Currency stockCurrency;
 }

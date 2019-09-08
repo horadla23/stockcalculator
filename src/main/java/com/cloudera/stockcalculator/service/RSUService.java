@@ -6,15 +6,13 @@ import com.cloudera.stockcalculator.persistence.model.VestingEvent;
 import com.cloudera.stockcalculator.persistence.repository.CurrencyRateRepository;
 import com.cloudera.stockcalculator.persistence.repository.StockPriceRepository;
 import com.cloudera.stockcalculator.persistence.repository.VestingEventRepository;
-import com.cloudera.stockcalculator.service.json.TimeSeries;
-import hu.mnb.webservices.MNBArfolyamServiceSoapGetExchangeRatesStringFaultFaultMessage;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import org.xml.sax.SAXException;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import java.net.MalformedURLException;
-import java.text.*;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.text.ParseException;
 import java.util.Date;
 
 @Service
@@ -34,18 +32,14 @@ public class RSUService {
     @Inject
     private StockPriceProvider stockPriceProvider;
 
-    @Inject CurrencyRateProvider currencyRateProvider;
+    @Inject
+    private CurrencyRateProvider currencyRateProvider;
 
-    public void addNewVesting(Date date, Integer quantity) throws ParseException, MNBArfolyamServiceSoapGetExchangeRatesStringFaultFaultMessage, MalformedURLException {
+    public void addNewVesting(Date date, Integer quantity) throws IOException, SAXException, ParserConfigurationException, ParseException {
         StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
         stockPriceRepository.save(stockPrice);
 
-        currencyRateProvider.getCurrencyRate(StockType.CLOUDERA.getCurrency());
-        // TODO MNB API call
-        CurrencyRate currencyRate = new CurrencyRate();
-        currencyRate.setRate(null);
-        currencyRate.setSource(StockType.CLOUDERA.getCurrency());
-        currencyRate.setTarget(Currency.HUF);
+        CurrencyRate currencyRate = currencyRateProvider.getCurrencyRate(StockType.CLOUDERA.getCurrency(), date);
         currencyRateRepository.save(currencyRate);
 
         VestingEvent vestingEvent = new VestingEvent();

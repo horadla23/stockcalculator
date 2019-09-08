@@ -4,7 +4,6 @@ plugins {
 	id 'org.asciidoctor.convert' version '1.5.8'
 	id 'java'
 	id 'com.palantir.docker' version '0.19.0'
-	id 'no.nils.wsdl2java' version '0.10'
 }
 
 group = 'com.cloudera'
@@ -19,6 +18,7 @@ configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
 	}
+	jaxb
 }
 
 repositories {
@@ -30,6 +30,45 @@ ext {
 	set('springBootAdminVersion', "2.1.5")
 	set('springCloudVersion', "Greenwich.SR2")
 }
+
+// tag::wsdl[]
+task genJaxb {
+	ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
+	ext.classesDir = "${buildDir}/classes/jaxb"
+	ext.schema = "http://www.mnb.hu/arfolyamok.asmx?wsdl"
+
+	outputs.dir classesDir
+
+	doLast() {
+		project.ant {
+			taskdef name: "xjc", classname: "com.sun.tools.xjc.XJCTask",
+					classpath: configurations.jaxb.asPath
+			mkdir(dir: sourcesDir)
+			mkdir(dir: classesDir)
+
+			xjc(destdir: sourcesDir, schema: schema,
+					package: "arfolyamok.wsdl") {
+				arg(value: "-wsdl")
+				produces(dir: sourcesDir, includes: "**/*.java")
+			}
+
+			javac(destdir: classesDir, source: 12, target: 12, debug: true,
+					debugLevel: "lines,vars,source",
+					classpath: configurations.jaxb.asPath) {
+				src(path: sourcesDir)
+				include(name: "**/*.java")
+				include(name: "*.java")
+			}
+
+			copy(todir: classesDir) {
+				fileset(dir: sourcesDir, erroronmissingdir: false) {
+					exclude(name: "**/*.java")
+				}
+			}
+		}
+	}
+}
+// end::wsdl[]
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -70,23 +109,16 @@ dependencies {
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.3.0.Final"
 
 	// wsdl
-	implementation 'no.nils:wsdl2java:0.10'
-	wsdl2java 'com.sun.xml.bind:jaxb-xjc:2.3.0.1'
-	wsdl2java 'javax.xml.bind:jaxb-api:2.3.1'
-	wsdl2java 'javax.xml.ws:jaxws-api:2.3.1'
-	wsdl2java 'org.apache.cxf:cxf-rt-wsdl:3.2.7'
-	wsdl2java 'javax.jws:javax.jws-api:1.1'
-	implementation 'com.sun.xml.bind:jaxb-xjc:2.3.0.1'
-	implementation 'javax.xml.bind:jaxb-api:2.3.1'
-	implementation 'javax.xml.ws:jaxws-api:2.3.1'
-	implementation 'org.apache.cxf:cxf-rt-wsdl:3.2.7'
-	implementation 'javax.jws:javax.jws-api:1.1'
-	compile 'org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.11.0'
-	wsdl2java 'org.jvnet.jaxb2_commons:jaxb2-basics-runtime:0.11.0'
-	wsdl2java 'org.jvnet.jaxb2_commons:jaxb2-basics:0.11.0'
-	implementation 'org.apache.cxf:cxf-rt-frontend-jaxws:3.3.3'
-	implementation 'org.apache.cxf:cxf-rt-transports-http:3.3.3'
-	implementation 'org.apache.cxf:cxf-rt-transports-http-jetty:3.3.3'
+	implementation("org.springframework.ws:spring-ws-core")
+	implementation(files(genJaxb.classesDir).builtBy(genJaxb))
+	jaxb "com.sun.xml.bind:jaxb-xjc:2.1.7"
+	implementation 'javax.xml.bind:jaxb-api:2.3.0'
+	implementation 'org.glassfish.jaxb:jaxb-runtime:2.3.0'
+	implementation "com.sun.xml.bind:jaxb-core:2.2.11"
+	implementation "com.sun.xml.bind:jaxb-impl:2.2.11"
+	implementation "javax.activation:activation:1.1.1"
+	implementation "javax.xml.soap:javax.xml.soap-api:1.4.0"
+	implementation 'com.sun.xml.messaging.saaj:saaj-impl:1.5.1'
 }
 
 dependencyManagement {
@@ -95,20 +127,12 @@ dependencyManagement {
 	}
 }
 
-wsdl2javaExt {
-	cxfVersion = "3.3.2"
-}
-
-wsdl2java{
-	generatedWsdlDir = file("${projectDir}/src/main/wsdl")
-	wsdlDir=file("${projectDir}/src/main/resources/wsdl/")
-	wsdlsToGenerate = [
-			[file("${projectDir}/src/main/resources/wsdl/arfolyamok.asmx.xml")]
-	]
-}
-
 test {
 	outputs.dir snippetsDir
+}
+
+bootJar {
+	from genJaxb.classesDir
 }
 
 task unpack(type: Copy) {

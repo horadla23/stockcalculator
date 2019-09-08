@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -27,4 +28,8 @@ public class CurrencyRate {
 
     @Column(nullable = false)
     private Float rate;
+
+    @Column
+    @Temporal(TemporalType.DATE)
+    private Date date;
 }
