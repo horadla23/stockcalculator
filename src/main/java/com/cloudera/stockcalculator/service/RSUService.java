@@ -7,11 +7,13 @@ import com.cloudera.stockcalculator.persistence.repository.CurrencyRateRepositor
 import com.cloudera.stockcalculator.persistence.repository.StockPriceRepository;
 import com.cloudera.stockcalculator.persistence.repository.VestingEventRepository;
 import com.cloudera.stockcalculator.service.json.TimeSeries;
+import hu.mnb.webservices.MNBArfolyamServiceSoapGetExchangeRatesStringFaultFaultMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import java.net.MalformedURLException;
 import java.text.*;
 import java.util.Date;
 
@@ -32,13 +34,18 @@ public class RSUService {
     @Inject
     private StockPriceProvider stockPriceProvider;
 
-    public void addNewVesting(Date date, Integer quantity, Float usdToHufRate) throws ParseException {
+    @Inject CurrencyRateProvider currencyRateProvider;
+
+    public void addNewVesting(Date date, Integer quantity) throws ParseException, MNBArfolyamServiceSoapGetExchangeRatesStringFaultFaultMessage, MalformedURLException {
         StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
         stockPriceRepository.save(stockPrice);
 
+        currencyRateProvider.getCurrencyRate(StockType.CLOUDERA.getCurrency());
         // TODO MNB API call
         CurrencyRate currencyRate = new CurrencyRate();
-        currencyRate.setRate(usdToHufRate);
+        currencyRate.setRate(null);
+        currencyRate.setSource(StockType.CLOUDERA.getCurrency());
+        currencyRate.setTarget(Currency.HUF);
         currencyRateRepository.save(currencyRate);
 
         VestingEvent vestingEvent = new VestingEvent();
