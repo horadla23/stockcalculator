@@ -1,5 +1,6 @@
 package com.cloudera.stockcalculator.persistence.model;
 
+import com.cloudera.stockcalculator.service.Currency;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

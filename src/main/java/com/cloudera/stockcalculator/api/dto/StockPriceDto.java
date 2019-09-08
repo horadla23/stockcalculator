@@ -1,6 +1,7 @@
 package com.cloudera.stockcalculator.api.dto;
 
-import com.cloudera.stockcalculator.persistence.model.Currency;
+import com.cloudera.stockcalculator.service.Currency;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,6 +15,7 @@ import java.util.Date;
 @AllArgsConstructor
 public class StockPriceDto {
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date date;
 
     private Float stockPrice;

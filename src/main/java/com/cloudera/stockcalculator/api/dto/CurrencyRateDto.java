@@ -1,6 +1,6 @@
 package com.cloudera.stockcalculator.api.dto;
 
-import com.cloudera.stockcalculator.persistence.model.Currency;
+import com.cloudera.stockcalculator.service.Currency;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

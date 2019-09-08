@@ -1,5 +1,6 @@
 package com.cloudera.stockcalculator.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ public class VestingEventDto {
 
     private CurrencyRateDto currencyRate;
 
+    @JsonFormat(pattern="yyyy-MM-dd")
     private Date vestingDate;
 
     private Integer quantity;
