@@ -35,7 +35,7 @@ ext {
 task genJaxb {
 	ext.sourcesDir = "${buildDir}/generated-sources/jaxb"
 	ext.classesDir = "${buildDir}/classes/jaxb"
-	ext.schema = "http://www.mnb.hu/arfolyamok.asmx?wsdl"
+	ext.schema = "http://www.mnb.hu/arfolyamok.asmx?singleWsdl"
 
 	outputs.dir classesDir
 

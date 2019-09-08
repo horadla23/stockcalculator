@@ -3,17 +3,19 @@ package com.cloudera.stockcalculator.service;
 import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
 import com.cloudera.stockcalculator.persistence.model.StockPrice;
 import com.cloudera.stockcalculator.persistence.model.VestingEvent;
-import com.cloudera.stockcalculator.persistence.repository.CurrencyRateRepository;
-import com.cloudera.stockcalculator.persistence.repository.StockPriceRepository;
 import com.cloudera.stockcalculator.persistence.repository.VestingEventRepository;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class RSUService {
@@ -27,12 +29,21 @@ public class RSUService {
     private StockPriceProvider stockPriceProvider;
 
     @Inject
-    private CurrencyRateProvider currencyRateProvider;
+    private List<CurrencyRateProvider> currencyRateProviderList;
 
-    public void addNewVesting(Date date, Integer quantity) throws IOException, SAXException, ParserConfigurationException, ParseException {
+    private final Map<Currency, CurrencyRateProvider> currencyCurrencyRateProviderMap = new HashMap<>();
+
+    @PostConstruct
+    public void populateRateProviderMap() {
+        currencyRateProviderList.forEach(rateProvider ->
+                currencyCurrencyRateProviderMap.put(rateProvider.getTargetCurrency(), rateProvider));
+    }
+
+    public void addNewVesting(Date date, Integer quantity) {
         StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
 
-        CurrencyRate currencyRate = currencyRateProvider.getCurrencyRate(StockType.CLOUDERA.getCurrency(), date);
+        CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(Currency.HUF)
+                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), date);
 
         VestingEvent vestingEvent = new VestingEvent();
         vestingEvent.setCurrencyRate(currencyRate);
