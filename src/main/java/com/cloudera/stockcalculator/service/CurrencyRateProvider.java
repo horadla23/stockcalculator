@@ -4,6 +4,7 @@ import arfolyamok.wsdl.GetExchangeRatesRequestBody;
 import arfolyamok.wsdl.GetExchangeRatesResponseBody;
 import arfolyamok.wsdl.ObjectFactory;
 import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
+import com.cloudera.stockcalculator.persistence.repository.CurrencyRateRepository;
 import lombok.extern.java.Log;
 import org.springframework.ws.client.core.support.WebServiceGatewaySupport;
 import org.w3c.dom.Document;
@@ -11,6 +12,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.inject.Inject;
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
@@ -24,12 +26,25 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 // for HUF
 @Log
 public class CurrencyRateProvider extends WebServiceGatewaySupport {
 
+    @Inject
+    private CurrencyRateRepository currencyRateRepository;
+
     public CurrencyRate getCurrencyRate(Currency currency, Date date) throws ParserConfigurationException, IOException, SAXException, ParseException {
+        Optional<CurrencyRate> byDateAndSource = currencyRateRepository.findByDateAndSource(date, currency);
+        if (byDateAndSource.isPresent()) {
+            return byDateAndSource.get();
+        }
+        CurrencyRate currencyRate = getCurrencyRateFromMNB(currency, date);
+        return currencyRateRepository.save(currencyRate);
+    }
+
+    private CurrencyRate getCurrencyRateFromMNB(Currency currency, Date date) throws ParserConfigurationException, IOException, SAXException, ParseException {
         String dateAsString = getDateString(date);
 
         String xmlRateResponse = callMNBService(currency, dateAsString);

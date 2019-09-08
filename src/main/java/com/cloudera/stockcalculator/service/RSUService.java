@@ -21,12 +21,6 @@ public class RSUService {
     private static final String ALPHA_API_KEY = "GLZ1EP7H6DFY2HQU";
 
     @Inject
-    private CurrencyRateRepository currencyRateRepository;
-
-    @Inject
-    private StockPriceRepository stockPriceRepository;
-
-    @Inject
     private VestingEventRepository vestingEventRepository;
 
     @Inject
@@ -37,10 +31,8 @@ public class RSUService {
 
     public void addNewVesting(Date date, Integer quantity) throws IOException, SAXException, ParserConfigurationException, ParseException {
         StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
-        stockPriceRepository.save(stockPrice);
 
         CurrencyRate currencyRate = currencyRateProvider.getCurrencyRate(StockType.CLOUDERA.getCurrency(), date);
-        currencyRateRepository.save(currencyRate);
 
         VestingEvent vestingEvent = new VestingEvent();
         vestingEvent.setCurrencyRate(currencyRate);
