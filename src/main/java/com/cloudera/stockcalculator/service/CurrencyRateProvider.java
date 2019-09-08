@@ -21,11 +21,9 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.text.*;
 import java.util.Date;
+import java.util.Locale;
 import java.util.Optional;
 
 // for HUF
@@ -66,7 +64,7 @@ public class CurrencyRateProvider extends WebServiceGatewaySupport {
         ByteArrayInputStream input = new ByteArrayInputStream(xmlRateResponse.getBytes("UTF-8"));
         Document doc = builder.parse(input);
         Element root = doc.getDocumentElement();
-        return NumberFormat.getInstance().parse(root.getFirstChild().getFirstChild().getTextContent()).floatValue();
+        return DecimalFormat.getInstance(Locale.GERMAN).parse(root.getFirstChild().getFirstChild().getTextContent()).floatValue();
     }
 
     private String callMNBService(Currency currency, String dateAsString) {
