@@ -20,9 +20,6 @@ public class VestingEvent {
     @OneToOne
     private StockPrice stockPrice;
 
-    @OneToOne
-    private CurrencyRate currencyRate;
-
     @Column
     @Temporal(TemporalType.DATE)
     private Date vestingDate;

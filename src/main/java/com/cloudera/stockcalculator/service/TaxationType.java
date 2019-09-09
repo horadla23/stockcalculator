@@ -1,5 +1,12 @@
 package com.cloudera.stockcalculator.service;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
 public enum TaxationType {
-    HUNGARIAN; // TODO calculation, dto, etc
+    HUNGARIAN(Currency.HUF); // TODO calculation, dto, etc
+
+    private Currency currency;
 }

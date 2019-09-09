@@ -16,8 +16,6 @@ public class VestingEventDto {
 
     private StockPriceDto stockPrice;
 
-    private CurrencyRateDto currencyRate;
-
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date vestingDate;
 
