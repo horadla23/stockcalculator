@@ -1,19 +1,19 @@
 package com.cloudera.stockcalculator.service;
 
+import com.cloudera.stockcalculator.api.dto.SellingEventDto;
 import com.cloudera.stockcalculator.api.dto.VestingEventDto;
+import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
 import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
+import com.cloudera.stockcalculator.persistence.model.SellingEvent;
 import com.cloudera.stockcalculator.persistence.model.StockPrice;
 import com.cloudera.stockcalculator.persistence.model.VestingEvent;
+import com.cloudera.stockcalculator.persistence.repository.SellingEventRepository;
 import com.cloudera.stockcalculator.persistence.repository.VestingEventRepository;
 import org.springframework.stereotype.Service;
-import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +26,9 @@ public class RSUService {
 
     @Inject
     private VestingEventRepository vestingEventRepository;
+
+    @Inject
+    private SellingEventRepository sellingEventRepository;
 
     @Inject
     private StockPriceProvider stockPriceProvider;
@@ -48,23 +51,47 @@ public class RSUService {
                 taxInformationProviderMap.put(taxInformationProvider.getTaxationType(), taxInformationProvider));
     }
 
-    public void addNewVesting(Date date, Integer quantity) {
+    public VestingEvent addNewVesting(Date date, Integer quantity) {
         StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
 
         VestingEvent vestingEvent = new VestingEvent();
         vestingEvent.setStockPrice(stockPrice);
         vestingEvent.setQuantity(quantity);
         vestingEvent.setVestingDate(date);
-        vestingEventRepository.save(vestingEvent);
+        return vestingEventRepository.save(vestingEvent);
+    }
+
+    public SellingEvent addNewSelling(Date date, Integer quantity, Float additionalFee, Long vestingId) {
+        StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
+        VestingEvent vestingEvent = getVestingEvent(vestingId);
+
+        SellingEvent sellingEvent = new SellingEvent();
+        sellingEvent.setVestingEvent(vestingEvent);
+        sellingEvent.setSettlementDate(date);
+        sellingEvent.setSettlementPrice(stockPrice);
+        sellingEvent.setAdditionalFee(additionalFee);
+        sellingEvent.setSoldQuantity(quantity);
+        return sellingEventRepository.save(sellingEvent);
     }
 
     public VestingTaxInformation getTaxationInformationAboutVesting(VestingEventDto vestingEventDto, TaxationType taxationType) {
         CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(taxationType.getCurrency())
-                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), vestingEventDto.getVestingDate());
+                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), vestingEventDto.getStockPrice().getDate());
         return taxInformationProviderMap.get(taxationType).getTaxationInformationAboutVesting(vestingEventDto, currencyRate);
+    }
+
+    public SellingTaxInformation getTaxationInformationAboutSelling(VestingEventDto vestingEventDto, SellingEventDto sellingEventDto, TaxationType taxationType) {
+        CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(taxationType.getCurrency())
+                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), sellingEventDto.getSettlementPrice().getDate());
+        return taxInformationProviderMap.get(taxationType)
+                .getTaxationInformationAboutStockSell(vestingEventDto, sellingEventDto, currencyRate);
     }
 
     public VestingEvent getVestingEvent(Long id) {
         return vestingEventRepository.findById(id).get();
+    }
+
+    public SellingEvent getSellingEvent(Long id) {
+        return sellingEventRepository.findById(id).get();
     }
 }

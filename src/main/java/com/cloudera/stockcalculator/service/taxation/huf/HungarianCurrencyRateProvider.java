@@ -55,8 +55,7 @@ public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport impl
     }
 
     private Float getCurrencyRateFromMNB(Currency sourceCurrency, Date date) throws ParserConfigurationException, IOException, SAXException, ParseException {
-        String dateAsString = getDateString(date);
-        String xmlRateResponse = callMNBService(sourceCurrency, dateAsString);
+        String xmlRateResponse = callMNBService(sourceCurrency, date);
         return getRateFromResponseXml(xmlRateResponse);
     }
 
@@ -70,7 +69,8 @@ public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport impl
         return DecimalFormat.getInstance(Locale.GERMAN).parse(root.getFirstChild().getFirstChild().getTextContent()).floatValue();
     }
 
-    private String callMNBService(Currency currency, String dateAsString) {
+    private String callMNBService(Currency currency, Date date) {
+        String dateAsString = getDateString(date);
         ObjectFactory factory = new ObjectFactory();
         GetExchangeRatesRequestBody body = new GetExchangeRatesRequestBody();
         body.setCurrencyNames(factory.createGetExchangeRatesRequestBodyCurrencyNames(currency.name()));

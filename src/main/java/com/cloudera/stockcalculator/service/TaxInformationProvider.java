@@ -7,10 +7,6 @@ import com.cloudera.stockcalculator.api.dto.taxation.PurchaseTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
 import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
-import com.cloudera.stockcalculator.persistence.repository.CurrencyRateRepository;
-
-import java.util.Date;
-import java.util.Optional;
 
 public interface TaxInformationProvider {
 
@@ -20,5 +16,5 @@ public interface TaxInformationProvider {
 
     PurchaseTaxInformation getTaxationInformationAboutESPPPurchase(PurchaseEventDto purchaseEventDto, CurrencyRate currencyRate);
 
-    SellingTaxInformation getTaxationInformationAboutStockSell(SellingEventDto sellingEventDto, CurrencyRate currencyRate);
+    SellingTaxInformation getTaxationInformationAboutStockSell(VestingEventDto vestingEventDto, SellingEventDto sellingEventDto, CurrencyRate currencyRate);
 }

@@ -1,6 +1,6 @@
 package com.cloudera.stockcalculator.api.dto.taxation.huf;
 
-import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
+import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,13 +10,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class HungarianVestingTaxInformation extends VestingTaxInformation {
+public class HungarianSellingTaxInformation extends SellingTaxInformation {
 
-    private Integer income;
+    private Integer gain;
 
-    private Integer netIncome;
-
-    private Integer socialTax;
+    private Integer additionalFee;
 
     private Integer personalTax;
 }

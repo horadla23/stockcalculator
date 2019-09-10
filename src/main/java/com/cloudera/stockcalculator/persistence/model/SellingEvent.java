@@ -1,6 +1,5 @@
 package com.cloudera.stockcalculator.persistence.model;
 
-import com.cloudera.stockcalculator.service.Currency;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -19,13 +18,10 @@ public class SellingEvent {
     private Long id;
 
     @OneToOne
-    private StockPrice vestingPrice;
+    private VestingEvent vestingEvent;
 
     @OneToOne
     private StockPrice settlementPrice;
-
-    @OneToOne
-    private CurrencyRate settlementRate;
 
     @Column
     @Temporal(TemporalType.DATE)
@@ -35,9 +31,8 @@ public class SellingEvent {
     private Integer soldQuantity;
 
     @Column
-    private Float additionalFee;
+    private Float soldPrice;
 
     @Column
-    @Enumerated(EnumType.STRING)
-    private Currency additionalFeeCurrency;
+    private Float additionalFee;
 }
