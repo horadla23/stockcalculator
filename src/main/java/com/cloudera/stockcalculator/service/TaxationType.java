@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum TaxationType {
-    HUNGARIAN(Currency.HUF); // TODO calculation, dto, etc
+    HUNGARIAN(Currency.HUF);
 
     private Currency currency;
 }

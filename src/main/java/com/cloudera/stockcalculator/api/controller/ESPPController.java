@@ -24,13 +24,13 @@ public class ESPPController {
 
     @GetMapping("/purchase/{id}")
     public @ResponseBody
-    PurchaseEventDto getVestingEvent(@PathVariable("id") Long id) {
+    PurchaseEventDto getPurchaseEvent(@PathVariable("id") Long id) {
         return PurchaseEventMapper.INSTANCE.purchaseEventToPurchaseEventDto(null);
     }
 
     @GetMapping("/purchase/{id}/tax/{taxation}")
     public @ResponseBody
-    PurchaseTaxInformation getVestingTaxInformation(@PathVariable("id") Long id, @PathVariable("taxation") TaxationType taxationType) {
+    PurchaseTaxInformation getPurchaseTaxInformation(@PathVariable("id") Long id, @PathVariable("taxation") TaxationType taxationType) {
         PurchaseEventDto purchaseEventDto = PurchaseEventMapper.INSTANCE.purchaseEventToPurchaseEventDto(null);
         return null;
     }

@@ -1,4 +1,4 @@
-package com.cloudera.stockcalculator.service.json;
+package com.cloudera.stockcalculator.service.taxation.huf.json;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

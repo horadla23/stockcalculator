@@ -22,14 +22,13 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
+
+import static com.cloudera.stockcalculator.service.DateUtils.getDateString;
+import static com.cloudera.stockcalculator.service.DateUtils.subtractDate;
 
 @Log
 public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport implements CurrencyRateProvider {
@@ -70,8 +69,7 @@ public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport impl
     }
 
     private BigDecimal getRateFromResponseXml(String xmlRateResponse) throws ParserConfigurationException, IOException, SAXException, ParseException {
-        DocumentBuilderFactory factory =
-                DocumentBuilderFactory.newInstance();
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         ByteArrayInputStream input = new ByteArrayInputStream(xmlRateResponse.getBytes("UTF-8"));
         Document doc = builder.parse(input);
@@ -87,26 +85,12 @@ public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport impl
         body.setCurrencyNames(factory.createGetExchangeRatesRequestBodyCurrencyNames(currency.name()));
         body.setStartDate(factory.createGetExchangeRatesRequestBodyStartDate(dateAsString));
         body.setEndDate(factory.createGetExchangeRatesRequestBodyEndDate(dateAsString));
+        QName getExchangeRates = new QName("http://www.mnb.hu/webservices/", "GetExchangeRates");
+        JAXBElement<GetExchangeRatesRequestBody> requestPayload = new JAXBElement<>(getExchangeRates, GetExchangeRatesRequestBody.class, null, body);
         JAXBElement<GetExchangeRatesResponseBody> responseBody = (JAXBElement<GetExchangeRatesResponseBody>) getWebServiceTemplate()
-                        .marshalSendAndReceive("http://www.mnb.hu/arfolyamok.asmx",
-                                new JAXBElement<GetExchangeRatesRequestBody>(
-                                        new QName("http://www.mnb.hu/webservices/", "GetExchangeRates"),
-                                        GetExchangeRatesRequestBody.class, null, body));
+                .marshalSendAndReceive("http://www.mnb.hu/arfolyamok.asmx", requestPayload);
         String xmlRateResponse = responseBody.getValue().getGetExchangeRatesResult().getValue();
         log.info("Response: " + xmlRateResponse);
         return xmlRateResponse;
-    }
-
-    private String getDateString(Date date) {
-        String pattern = "yyyy-MM-dd";
-        DateFormat df = new SimpleDateFormat(pattern);
-        return df.format(date);
-    }
-
-    private Date subtractDate(Date original) {
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(original);
-        cal.add(Calendar.DATE, -1);
-        return cal.getTime();
     }
 }
