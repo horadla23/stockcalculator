@@ -21,4 +21,6 @@ public interface TaxInformationProvider {
     SellingTaxInformation getTaxationInformationAboutStockSell(SellingEventDto sellingEventDto);
 
     Map<Integer, ? extends SellingTaxInformation> getSellingTaxInfoByYear(List<SellingEventDto> sellingEvents);
+
+    Map<String, ? extends VestingTaxInformation> getVestingTaxInfoByYear(List<VestingEventDto> vestingEvents);
 }

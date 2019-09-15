@@ -5,6 +5,7 @@ import com.cloudera.stockcalculator.api.dto.VestingEventDto;
 import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
 import com.cloudera.stockcalculator.api.mapper.SellingEventMapper;
+import com.cloudera.stockcalculator.api.mapper.VestingEventMapper;
 import com.cloudera.stockcalculator.persistence.model.SellingEvent;
 import com.cloudera.stockcalculator.persistence.model.StockType;
 import com.cloudera.stockcalculator.persistence.model.VestingEvent;
@@ -80,5 +81,10 @@ public class RSUService {
     public Map<Integer, ? extends SellingTaxInformation> getTaxationInformationAboutSellingByYear(TaxationType taxationType) {
         List<SellingEventDto> all = SellingEventMapper.INSTANCE.sellingEventsToSellingEventDtos(sellingEventRepository.findAll());
         return taxInformationProviderMap.get(taxationType).getSellingTaxInfoByYear(all);
+    }
+
+    public Map<String, ? extends VestingTaxInformation> getTaxationInformationAboutVestingByYear(TaxationType taxationType) {
+        List<VestingEventDto> all = VestingEventMapper.INSTANCE.vestingEventsToVestingEventDtos(vestingEventRepository.findAll());
+        return taxInformationProviderMap.get(taxationType).getVestingTaxInfoByYear(all);
     }
 }

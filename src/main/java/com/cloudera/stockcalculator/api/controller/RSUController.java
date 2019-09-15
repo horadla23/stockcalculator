@@ -65,4 +65,9 @@ public class RSUController {
     public Map<Integer, ? extends SellingTaxInformation> getSellingTaxInformationByYear(@PathVariable("taxation") TaxationType taxationType) {
         return rsuService.getTaxationInformationAboutSellingByYear(taxationType);
     }
+
+    @GetMapping("/vesting/tax/{taxation}")
+    public Map<String, ? extends VestingTaxInformation> getVestingTaxInformationByYear(@PathVariable("taxation") TaxationType taxationType) {
+        return rsuService.getTaxationInformationAboutVestingByYear(taxationType);
+    }
 }

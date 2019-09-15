@@ -88,4 +88,37 @@ public class HungarianTaxInformationProvider implements TaxInformationProvider {
         });
         return result;
     }
+
+    @Override
+    public Map<String, HungarianVestingTaxInformation> getVestingTaxInfoByYear(List<VestingEventDto> vestingEvents) {
+        Map<String, List<BigDecimal>> incomeMap = Maps.newConcurrentMap();
+        Map<String, List<BigDecimal>> personalTaxMap = Maps.newConcurrentMap();
+        Map<String, List<BigDecimal>> socialTaxMap = Maps.newConcurrentMap();
+        vestingEvents.forEach(vestingEventDto -> {
+            GregorianCalendar cal = new GregorianCalendar();
+            cal.setTime(vestingEventDto.getVestingDate());
+            Integer year = cal.get(Calendar.YEAR);
+            Integer quarter = (cal.get(Calendar.MONTH) + 1) / 3;
+            String key = year + "Q" + quarter;
+            HungarianVestingTaxInformation vestingTaxInformation = getTaxationInformationAboutVesting(vestingEventDto);
+            if (incomeMap.containsKey(key)) {
+                incomeMap.get(key).add(vestingTaxInformation.getIncome());
+                personalTaxMap.get(key).add(vestingTaxInformation.getPersonalTax());
+                socialTaxMap.get(key).add(vestingTaxInformation.getSocialTax());
+            } else {
+                incomeMap.put(key, Lists.newArrayList(vestingTaxInformation.getIncome()));
+                personalTaxMap.put(key, Lists.newArrayList(vestingTaxInformation.getPersonalTax()));
+                socialTaxMap.put(key, Lists.newArrayList(vestingTaxInformation.getSocialTax()));
+            }
+        });
+        Map<String, HungarianVestingTaxInformation> result = Maps.newHashMap();
+        incomeMap.keySet().stream().forEach(key -> {
+            HungarianVestingTaxInformation tax = new HungarianVestingTaxInformation();
+            tax.setIncome(incomeMap.get(key).stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+            tax.setSocialTax(socialTaxMap.get(key).stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+            tax.setPersonalTax(personalTaxMap.get(key).stream().reduce(BigDecimal.ZERO, BigDecimal::add));
+            result.put(key, tax);
+        });
+        return result;
+    }
 }
