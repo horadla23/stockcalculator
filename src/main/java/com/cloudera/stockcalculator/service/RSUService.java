@@ -4,7 +4,7 @@ import com.cloudera.stockcalculator.api.dto.SellingEventDto;
 import com.cloudera.stockcalculator.api.dto.VestingEventDto;
 import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
-import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
+import com.cloudera.stockcalculator.api.mapper.SellingEventMapper;
 import com.cloudera.stockcalculator.persistence.model.SellingEvent;
 import com.cloudera.stockcalculator.persistence.model.StockType;
 import com.cloudera.stockcalculator.persistence.model.VestingEvent;
@@ -30,19 +30,12 @@ public class RSUService {
     private SellingEventRepository sellingEventRepository;
 
     @Inject
-    private List<CurrencyRateProvider> currencyRateProviderList;
-
-    @Inject
     private List<TaxInformationProvider> taxInformationProviderList;
-
-    private final Map<Currency, CurrencyRateProvider> currencyCurrencyRateProviderMap = new HashMap<>();
 
     private final Map<TaxationType, TaxInformationProvider> taxInformationProviderMap = new HashMap<>();
 
     @PostConstruct
     public void populateRateProviderMap() {
-        currencyRateProviderList.forEach(rateProvider ->
-                currencyCurrencyRateProviderMap.put(rateProvider.getTargetCurrency(), rateProvider));
         taxInformationProviderList.forEach(taxInformationProvider ->
                 taxInformationProviderMap.put(taxInformationProvider.getTaxationType(), taxInformationProvider));
     }
@@ -69,16 +62,11 @@ public class RSUService {
     }
 
     public VestingTaxInformation getTaxationInformationAboutVesting(VestingEventDto vestingEventDto, TaxationType taxationType) {
-        CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(taxationType.getCurrency())
-                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), vestingEventDto.getVestingDate());
-        return taxInformationProviderMap.get(taxationType).getTaxationInformationAboutVesting(vestingEventDto, currencyRate);
+        return taxInformationProviderMap.get(taxationType).getTaxationInformationAboutVesting(vestingEventDto);
     }
 
-    public SellingTaxInformation getTaxationInformationAboutSelling(VestingEventDto vestingEventDto, SellingEventDto sellingEventDto, TaxationType taxationType) {
-        CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(taxationType.getCurrency())
-                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), sellingEventDto.getSettlementDate());
-        return taxInformationProviderMap.get(taxationType)
-                .getTaxationInformationAboutStockSell(vestingEventDto, sellingEventDto, currencyRate);
+    public SellingTaxInformation getTaxationInformationAboutSelling(SellingEventDto sellingEventDto, TaxationType taxationType) {
+        return taxInformationProviderMap.get(taxationType).getTaxationInformationAboutStockSell(sellingEventDto);
     }
 
     public VestingEvent getVestingEvent(Long id) {
@@ -87,5 +75,10 @@ public class RSUService {
 
     public SellingEvent getSellingEvent(Long id) {
         return sellingEventRepository.findById(id).get();
+    }
+
+    public Map<Integer, ? extends SellingTaxInformation> getTaxationInformationAboutSellingByYear(TaxationType taxationType) {
+        List<SellingEventDto> all = SellingEventMapper.INSTANCE.sellingEventsToSellingEventDtos(sellingEventRepository.findAll());
+        return taxInformationProviderMap.get(taxationType).getSellingTaxInfoByYear(all);
     }
 }

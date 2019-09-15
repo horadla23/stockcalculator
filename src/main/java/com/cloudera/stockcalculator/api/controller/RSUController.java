@@ -12,6 +12,7 @@ import com.cloudera.stockcalculator.service.TaxationType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.inject.Inject;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/rsu")
@@ -57,7 +58,11 @@ public class RSUController {
     SellingTaxInformation getSellingTaxInformation(@PathVariable("id") Long id, @PathVariable("taxation") TaxationType taxationType) {
         SellingEvent sellingEvent = rsuService.getSellingEvent(id);
         SellingEventDto sellingEventDto = SellingEventMapper.INSTANCE.sellingEventToSellingEventDto(sellingEvent);
-        VestingEventDto vestingEventDto = VestingEventMapper.INSTANCE.vestingEventToVestingEventDto(sellingEvent.getVestingEvent());
-        return rsuService.getTaxationInformationAboutSelling(vestingEventDto, sellingEventDto, taxationType);
+        return rsuService.getTaxationInformationAboutSelling(sellingEventDto, taxationType);
+    }
+
+    @GetMapping("/selling/tax/{taxation}")
+    public Map<Integer, ? extends SellingTaxInformation> getSellingTaxInformationByYear(@PathVariable("taxation") TaxationType taxationType) {
+        return rsuService.getTaxationInformationAboutSellingByYear(taxationType);
     }
 }

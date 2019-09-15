@@ -22,4 +22,6 @@ public class SellingEventDto {
 
     private BigDecimal additionalFee;
 
+    private VestingEventDto vestingEvent;
+
 }

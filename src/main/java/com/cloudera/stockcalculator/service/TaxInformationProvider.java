@@ -6,15 +6,19 @@ import com.cloudera.stockcalculator.api.dto.VestingEventDto;
 import com.cloudera.stockcalculator.api.dto.taxation.PurchaseTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
-import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
+
+import java.util.List;
+import java.util.Map;
 
 public interface TaxInformationProvider {
 
     TaxationType getTaxationType();
 
-    VestingTaxInformation getTaxationInformationAboutVesting(VestingEventDto vestingEventDto, CurrencyRate currencyRate);
+    VestingTaxInformation getTaxationInformationAboutVesting(VestingEventDto vestingEventDto);
 
-    PurchaseTaxInformation getTaxationInformationAboutESPPPurchase(PurchaseEventDto purchaseEventDto, CurrencyRate currencyRate);
+    PurchaseTaxInformation getTaxationInformationAboutESPPPurchase(PurchaseEventDto purchaseEventDto);
 
-    SellingTaxInformation getTaxationInformationAboutStockSell(VestingEventDto vestingEventDto, SellingEventDto sellingEventDto, CurrencyRate currencyRate);
+    SellingTaxInformation getTaxationInformationAboutStockSell(SellingEventDto sellingEventDto);
+
+    Map<Integer, ? extends SellingTaxInformation> getSellingTaxInfoByYear(List<SellingEventDto> sellingEvents);
 }
