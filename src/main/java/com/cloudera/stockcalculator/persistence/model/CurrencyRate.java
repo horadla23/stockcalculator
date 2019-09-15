@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -27,7 +28,7 @@ public class CurrencyRate {
     private Currency target = Currency.HUF;
 
     @Column(nullable = false)
-    private Float rate;
+    private BigDecimal rate;
 
     @Column
     @Temporal(TemporalType.DATE)

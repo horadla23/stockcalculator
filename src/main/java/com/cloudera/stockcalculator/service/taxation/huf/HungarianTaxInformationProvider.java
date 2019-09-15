@@ -12,6 +12,8 @@ import com.cloudera.stockcalculator.service.TaxInformationProvider;
 import com.cloudera.stockcalculator.service.TaxationType;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+
 @Service
 public class HungarianTaxInformationProvider implements TaxInformationProvider {
 
@@ -23,11 +25,11 @@ public class HungarianTaxInformationProvider implements TaxInformationProvider {
     @Override
     public HungarianVestingTaxInformation getTaxationInformationAboutVesting(VestingEventDto vestingEventDto, CurrencyRate currencyRate) {
         HungarianVestingTaxInformation hungarianVestingTaxInformation = new HungarianVestingTaxInformation();
-        hungarianVestingTaxInformation.setIncome((int) (vestingEventDto.getQuantity()
-                * vestingEventDto.getStockPrice().getStockPrice() * currencyRate.getRate()));
-        hungarianVestingTaxInformation.setNetIncome((int) (hungarianVestingTaxInformation.getIncome() * 0.84));
-        hungarianVestingTaxInformation.setPersonalTax((int) (hungarianVestingTaxInformation.getNetIncome() * 0.15));
-        hungarianVestingTaxInformation.setSocialTax((int) (hungarianVestingTaxInformation.getNetIncome() * 0.195));
+        hungarianVestingTaxInformation.setIncome(vestingEventDto.getStockPrice()
+                .multiply(currencyRate.getRate()).multiply(new BigDecimal(vestingEventDto.getQuantity())));
+        hungarianVestingTaxInformation.setNetIncome(hungarianVestingTaxInformation.getIncome().multiply(new BigDecimal(0.84)));
+        hungarianVestingTaxInformation.setPersonalTax(hungarianVestingTaxInformation.getNetIncome().multiply(new BigDecimal(0.15)));
+        hungarianVestingTaxInformation.setSocialTax(hungarianVestingTaxInformation.getNetIncome().multiply(new BigDecimal(0.195)));
         return hungarianVestingTaxInformation;
     }
 
@@ -39,10 +41,10 @@ public class HungarianTaxInformationProvider implements TaxInformationProvider {
     @Override
     public SellingTaxInformation getTaxationInformationAboutStockSell(VestingEventDto vestingEventDto, SellingEventDto sellingEventDto, CurrencyRate currencyRate) {
         HungarianSellingTaxInformation sellingTaxInformation = new HungarianSellingTaxInformation();
-        Float base = currencyRate.getRate() * sellingEventDto.getSoldQuantity();
-        sellingTaxInformation.setGain((int) (base * sellingEventDto.getSettlementPrice().getStockPrice() - base * vestingEventDto.getStockPrice().getStockPrice()));
-        sellingTaxInformation.setAdditionalFee((int) (sellingEventDto.getAdditionalFee() * currencyRate.getRate()));
-        sellingTaxInformation.setPersonalTax((int) (sellingTaxInformation.getGain() * 0.15 - sellingTaxInformation.getAdditionalFee()));
+        BigDecimal base = currencyRate.getRate().multiply(new BigDecimal(sellingEventDto.getSoldQuantity()));
+        sellingTaxInformation.setGain(base.multiply(sellingEventDto.getSoldPrice()).subtract(base.multiply(vestingEventDto.getStockPrice())));
+        sellingTaxInformation.setAdditionalFee(sellingEventDto.getAdditionalFee().multiply(currencyRate.getRate()));
+        sellingTaxInformation.setPersonalTax(sellingTaxInformation.getGain().multiply(new BigDecimal(0.15)).subtract(sellingTaxInformation.getAdditionalFee()));
         return sellingTaxInformation;
     }
 }

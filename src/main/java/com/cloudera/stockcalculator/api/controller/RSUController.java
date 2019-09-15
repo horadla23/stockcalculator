@@ -23,7 +23,8 @@ public class RSUController {
     @PostMapping("/vesting")
     public VestingEventDto addVestingEvent(@RequestBody VestingEventDto vestingEventDto) {
         return VestingEventMapper.INSTANCE.vestingEventToVestingEventDto(
-                rsuService.addNewVesting(vestingEventDto.getVestingDate(), vestingEventDto.getQuantity()));
+                rsuService.addNewVesting(vestingEventDto.getVestingDate(), vestingEventDto.getQuantity(),
+                        vestingEventDto.getStockPrice()));
     }
 
     @GetMapping("/vesting/{id}")
@@ -42,7 +43,7 @@ public class RSUController {
     @PostMapping("/selling/{vestingId}")
     public SellingEventDto addSellingEvent(@RequestBody SellingEventDto sellingEventDto, @PathVariable("vestingId") Long vestingId) {
         return SellingEventMapper.INSTANCE.sellingEventToSellingEventDto(rsuService.addNewSelling(sellingEventDto.getSettlementDate(),
-                sellingEventDto.getSoldQuantity(), sellingEventDto.getAdditionalFee(), vestingId));
+                sellingEventDto.getSoldQuantity(), sellingEventDto.getSoldPrice(), sellingEventDto.getAdditionalFee(), vestingId));
     }
 
     @GetMapping("/selling/{id}")

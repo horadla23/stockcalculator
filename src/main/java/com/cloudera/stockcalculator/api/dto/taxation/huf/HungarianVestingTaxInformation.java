@@ -6,17 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class HungarianVestingTaxInformation extends VestingTaxInformation {
 
-    private Integer income;
+    private BigDecimal income;
 
-    private Integer netIncome;
+    private BigDecimal netIncome;
 
-    private Integer socialTax;
+    private BigDecimal socialTax;
 
-    private Integer personalTax;
+    private BigDecimal personalTax;
 }

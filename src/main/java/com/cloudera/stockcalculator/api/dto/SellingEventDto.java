@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -12,15 +13,13 @@ import java.util.Date;
 @NoArgsConstructor
 public class SellingEventDto {
 
-    private StockPriceDto settlementPrice;
-
     @JsonFormat(pattern="yyyy-MM-dd")
     private Date settlementDate;
 
     private Integer soldQuantity;
 
-    private Float soldPrice;
+    private BigDecimal soldPrice;
 
-    private Float additionalFee;
+    private BigDecimal additionalFee;
 
 }

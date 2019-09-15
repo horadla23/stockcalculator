@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -20,9 +21,6 @@ public class SellingEvent {
     @OneToOne
     private VestingEvent vestingEvent;
 
-    @OneToOne
-    private StockPrice settlementPrice;
-
     @Column
     @Temporal(TemporalType.DATE)
     private Date settlementDate;
@@ -31,8 +29,8 @@ public class SellingEvent {
     private Integer soldQuantity;
 
     @Column
-    private Float soldPrice;
+    private BigDecimal soldPrice;
 
     @Column
-    private Float additionalFee;
+    private BigDecimal additionalFee;
 }

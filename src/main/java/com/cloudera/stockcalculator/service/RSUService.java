@@ -6,7 +6,7 @@ import com.cloudera.stockcalculator.api.dto.taxation.SellingTaxInformation;
 import com.cloudera.stockcalculator.api.dto.taxation.VestingTaxInformation;
 import com.cloudera.stockcalculator.persistence.model.CurrencyRate;
 import com.cloudera.stockcalculator.persistence.model.SellingEvent;
-import com.cloudera.stockcalculator.persistence.model.StockPrice;
+import com.cloudera.stockcalculator.persistence.model.StockType;
 import com.cloudera.stockcalculator.persistence.model.VestingEvent;
 import com.cloudera.stockcalculator.persistence.repository.SellingEventRepository;
 import com.cloudera.stockcalculator.persistence.repository.VestingEventRepository;
@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -22,16 +23,11 @@ import java.util.Map;
 @Service
 public class RSUService {
 
-    private static final String ALPHA_API_KEY = "GLZ1EP7H6DFY2HQU";
-
     @Inject
     private VestingEventRepository vestingEventRepository;
 
     @Inject
     private SellingEventRepository sellingEventRepository;
-
-    @Inject
-    private StockPriceProvider stockPriceProvider;
 
     @Inject
     private List<CurrencyRateProvider> currencyRateProviderList;
@@ -51,38 +47,36 @@ public class RSUService {
                 taxInformationProviderMap.put(taxInformationProvider.getTaxationType(), taxInformationProvider));
     }
 
-    public VestingEvent addNewVesting(Date date, Integer quantity) {
-        StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
-
+    public VestingEvent addNewVesting(Date date, Integer quantity, BigDecimal stockPrice) {
         VestingEvent vestingEvent = new VestingEvent();
         vestingEvent.setStockPrice(stockPrice);
         vestingEvent.setQuantity(quantity);
         vestingEvent.setVestingDate(date);
+        vestingEvent.setStockType(StockType.CLOUDERA);
         return vestingEventRepository.save(vestingEvent);
     }
 
-    public SellingEvent addNewSelling(Date date, Integer quantity, Float additionalFee, Long vestingId) {
-        StockPrice stockPrice = stockPriceProvider.getStockPrice(date, StockType.CLOUDERA);
+    public SellingEvent addNewSelling(Date date, Integer quantity, BigDecimal stockPrice, BigDecimal additionalFee, Long vestingId) {
         VestingEvent vestingEvent = getVestingEvent(vestingId);
 
         SellingEvent sellingEvent = new SellingEvent();
         sellingEvent.setVestingEvent(vestingEvent);
         sellingEvent.setSettlementDate(date);
-        sellingEvent.setSettlementPrice(stockPrice);
         sellingEvent.setAdditionalFee(additionalFee);
         sellingEvent.setSoldQuantity(quantity);
+        sellingEvent.setSoldPrice(stockPrice);
         return sellingEventRepository.save(sellingEvent);
     }
 
     public VestingTaxInformation getTaxationInformationAboutVesting(VestingEventDto vestingEventDto, TaxationType taxationType) {
         CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(taxationType.getCurrency())
-                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), vestingEventDto.getStockPrice().getDate());
+                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), vestingEventDto.getVestingDate());
         return taxInformationProviderMap.get(taxationType).getTaxationInformationAboutVesting(vestingEventDto, currencyRate);
     }
 
     public SellingTaxInformation getTaxationInformationAboutSelling(VestingEventDto vestingEventDto, SellingEventDto sellingEventDto, TaxationType taxationType) {
         CurrencyRate currencyRate = currencyCurrencyRateProviderMap.get(taxationType.getCurrency())
-                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), sellingEventDto.getSettlementPrice().getDate());
+                .getCurrencyRate(StockType.CLOUDERA.getCurrency(), sellingEventDto.getSettlementDate());
         return taxInformationProviderMap.get(taxationType)
                 .getTaxationInformationAboutStockSell(vestingEventDto, sellingEventDto, currencyRate);
     }

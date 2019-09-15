@@ -21,11 +21,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 
 @Log
@@ -45,28 +48,36 @@ public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport impl
     }
 
     @Override
-    public Float getRate(Currency sourceCurrency, Date date) {
+    public BigDecimal getRate(Currency sourceCurrency, Date date) {
         try {
             return getCurrencyRateFromMNB(sourceCurrency, date);
+        } catch (DayWithoutRateException e) {
+            log.info(String.format("It seems MNB has no rate for date %s, trying for previous date!", date.toString()));
+            return getRate(sourceCurrency, subtractDate(date));
         } catch (Exception e) {
             log.info(e.getMessage());
             throw new BadRequestException("Exception during getting currency rate!", e);
         }
     }
 
-    private Float getCurrencyRateFromMNB(Currency sourceCurrency, Date date) throws ParserConfigurationException, IOException, SAXException, ParseException {
+    private BigDecimal getCurrencyRateFromMNB(Currency sourceCurrency, Date date) throws DayWithoutRateException {
         String xmlRateResponse = callMNBService(sourceCurrency, date);
-        return getRateFromResponseXml(xmlRateResponse);
+        try {
+            return getRateFromResponseXml(xmlRateResponse);
+        } catch (Exception e) {
+            throw new DayWithoutRateException();
+        }
     }
 
-    private Float getRateFromResponseXml(String xmlRateResponse) throws ParserConfigurationException, IOException, SAXException, ParseException {
+    private BigDecimal getRateFromResponseXml(String xmlRateResponse) throws ParserConfigurationException, IOException, SAXException, ParseException {
         DocumentBuilderFactory factory =
                 DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         ByteArrayInputStream input = new ByteArrayInputStream(xmlRateResponse.getBytes("UTF-8"));
         Document doc = builder.parse(input);
         Element root = doc.getDocumentElement();
-        return DecimalFormat.getInstance(Locale.GERMAN).parse(root.getFirstChild().getFirstChild().getTextContent()).floatValue();
+        return new BigDecimal(DecimalFormat.getInstance(Locale.GERMAN)
+                .parse(root.getFirstChild().getFirstChild().getTextContent()).floatValue());
     }
 
     private String callMNBService(Currency currency, Date date) {
@@ -90,5 +101,12 @@ public class HungarianCurrencyRateProvider extends WebServiceGatewaySupport impl
         String pattern = "yyyy-MM-dd";
         DateFormat df = new SimpleDateFormat(pattern);
         return df.format(date);
+    }
+
+    private Date subtractDate(Date original) {
+        GregorianCalendar cal = new GregorianCalendar();
+        cal.setTime(original);
+        cal.add(Calendar.DATE, -1);
+        return cal.getTime();
     }
 }

@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -17,8 +18,8 @@ public class VestingEvent {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @OneToOne
-    private StockPrice stockPrice;
+    @Column
+    private BigDecimal stockPrice;
 
     @Column
     @Temporal(TemporalType.DATE)
@@ -26,4 +27,8 @@ public class VestingEvent {
 
     @Column
     private Integer quantity;
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private StockType stockType;
 }

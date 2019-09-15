@@ -1,11 +1,11 @@
 package com.cloudera.stockcalculator.persistence.model;
 
-import com.cloudera.stockcalculator.service.Currency;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Getter
@@ -26,16 +26,13 @@ public class PurchaseEvent {
     @Temporal(TemporalType.DATE)
     private Date purchaseDate;
 
-    @OneToOne
-    private StockPrice enrollmentPrice;
-
-    @OneToOne
-    private StockPrice purchasePrice;
+    @Column
+    private BigDecimal enrollmentPrice;
 
     @Column
-    private Integer source;
+    private BigDecimal purchasePrice;
 
-    @Column
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Currency sourceCurrency;
+    private StockType stockType;
 }
